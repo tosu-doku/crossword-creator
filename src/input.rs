@@ -6,5 +6,5 @@ pub fn parse_input() -> String {
     println!("Provide a word:");
     let _ = io::stdin().read_line(&mut user_input); // get string from the user input
 
-    return user_input;
+    return user_input.trim().to_string();
 }

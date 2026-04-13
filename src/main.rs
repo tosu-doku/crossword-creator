@@ -1,4 +1,4 @@
-// mod input;
+mod input;
 use std::collections::HashMap;
 
 const START_HEIGHT: usize = 16;
@@ -86,8 +86,9 @@ fn main() {
 
     let mut char_map = HashMap::new();
     
-    let toplace: &str = "kotek";
-    place(&mut board, &mut char_map, toplace);
+    let input: String = input::parse_input(); 
+    // let toplace: &str = "kotek";
+    place(&mut board, &mut char_map, &input);
 
     print_crossword(&board, (0,0), (START_WIDTH-1,START_HEIGHT-1));
 
