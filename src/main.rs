@@ -40,6 +40,36 @@ fn place(board: &mut BoardType, char_map: &mut LocationMap, word: &str) {
     }
 }
 
+/// this function aims to return 'edge' points containing the part of a crossword that is filled
+fn find_borders(board: &Vec<Vec<char>>) -> (Location,Location){
+
+    let mut value_found: bool = false;
+    let mut start: (usize,usize) = (0,0); 
+    let mut end: (usize, usize) = (0,0);
+
+    for row_idx in 0..board.len(){
+        for col_idx in 0..board[0].len(){
+            // skip if letter not found
+            if board[row_idx][col_idx] == ' ' {
+                continue;
+            }
+            // mark the first appearance
+            else if !value_found {
+                start = (row_idx,col_idx);
+                value_found = true
+            }
+            // mark the last appearance
+            end = (row_idx,col_idx);
+        }
+    }
+
+    if !value_found {    // FIXME - TEMPORARY SOLUTION
+        panic!("Nothing found, can't find borders!")
+    }
+    
+    return (start,end);
+}
+
 /// function that prints the crossword in certain range, including end point coordinates!
 fn print_crossword(board: &BoardType, start: Location, end: Location){
 
@@ -61,5 +91,9 @@ fn main() {
 
     print_crossword(&board, (0,0), (START_WIDTH-1,START_HEIGHT-1));
 
+    let (start, end) = find_borders(&board);
+    println!("{},{};{},{}",start.0,start.1,end.0,end.1);
     println!("{:?}",char_map);
+
+    print_crossword(&board, start, end);
 }
