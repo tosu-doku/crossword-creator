@@ -1,4 +1,5 @@
 use std::collections::HashMap;
+use std::cmp::{min,max};
 
 // export types to dependency.rs later
 type BoardType = Vec<Vec<char>>;
@@ -41,7 +42,7 @@ pub fn place(board: &mut BoardType, char_map: &mut LocationMap, word: &str) {
 pub fn find_borders(board: &Vec<Vec<char>>) -> (Location,Location){
 
     let mut value_found: bool = false;
-    let mut start: (usize,usize) = (0,0); 
+    let mut start: (usize,usize) = (board[0].len(),board.len()); 
     let mut end: (usize, usize) = (0,0);
 
     for row_idx in 0..board.len(){
@@ -50,13 +51,12 @@ pub fn find_borders(board: &Vec<Vec<char>>) -> (Location,Location){
             if board[row_idx][col_idx] == ' ' {
                 continue;
             }
-            // mark the first appearance
-            else if !value_found {
-                start = (row_idx,col_idx);
-                value_found = true
+            else {
+                value_found = true;
+                start = (min(row_idx,start.0),min(col_idx,start.1));
+                end = (max(row_idx,end.0),max(col_idx,end.1));
+                println!("{:?},{:?}",start,end)
             }
-            // mark the last appearance
-            end = (row_idx,col_idx);
         }
     }
 
