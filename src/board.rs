@@ -56,7 +56,7 @@ pub fn place(board: &mut BoardType, char_map: &mut LocationMap, word: &str) {
 
 pub fn return_crossword (list : &mut Vec<&str>){
     let mut best_board : Vec<Vec<char>>;
-    let mut best_pos : (Location, Location);
+    let mut best_pos : (Location, Location) = ((0,0),(0, 0));
     let mut count = 0;
 
     while count < SHUFFLE_COUNT{
@@ -83,28 +83,30 @@ pub fn return_crossword (list : &mut Vec<&str>){
 
 }
 pub fn generate_crossword(list : &mut Vec<&str>) -> Vec<Vec<char>>{
-    let mut board : Vec<Vec<char>>;
-    let mut char_map : HashMap<char,Vec<(Location,Quality)>>;
+    loop {
+        let mut board: Vec<Vec<char>> = vec![vec![' '; START_WIDTH]; START_HEIGHT];
+        let mut char_map: HashMap<char, Vec<(Location, Quality)>> = HashMap::new();
 
-    while 1 {
-        let mut pom :(&str, usize);
-        let mut check = true;
+        let mut counter = 0;
 
         list.shuffle(&mut thread_rng());
-        let mut cur= list.clone();
-        while !cur.is_empty(){
-            let mut word = cur.pop();
-            if !best_placement(&mut board, &mut char_map, word){
-                if Some(pom){
-                    if pom.0 == word && cur.len() == pom.1 {
-                        check = false;
-                        break;
-                    }
-                }
-                cur.push_front(word);
+        let mut cur: VecDeque<&str> = list.iter().copied().collect();
+
+        while !cur.is_empty() {
+            let mut word = cur.pop_front().unwrap();
+
+            if !best_placement(&mut board, &mut char_map, word) {
+                counter+=1;
+                cur.push_back(word);
+            } else{
+                counter = 0;
+            }
+
+            if counter == cur.len(){
+                break;
             }
         }
-        if check{
+        if cur.is_empty(){
             return board;
         }
     }
@@ -113,10 +115,9 @@ pub fn best_placement(board: &mut BoardType, char_map: &mut LocationMap, word: &
     let length = word.chars().count() as usize;
     let mut best : Option<(Quality, Location, Direction)> = None;
     if char_map.is_empty() { // first word on board
-        let lenght = (word.chars().count() as f32 / 2) as usize;
-        let start: Location = (START_WIDTH/2 - lenght, START_HEIGHT / 2);
+        let start: Location = (START_WIDTH/2 - length, START_HEIGHT / 2);
+        
         place_from_point(board, char_map, word, start, RIGHT) ;
-
         return true;
     }
 
