@@ -6,8 +6,8 @@ pub use rand::seq::SliceRandom;
 pub type BoardType = Vec<Vec<char>>;
 pub type Location = (usize,usize);
 pub type Quality = f32;
-pub type LocationMap = HashMap<char,Vec<(Location)>>;
-pub type LocationMapDirection = HashMap<Direction,Vec<(Location)>>;
+pub type LocationMap = HashMap<char,Vec<Location>>;
+pub type LocationMapDirection = HashMap<Direction,Vec<Location>>;
 pub type LocationMapQuality = HashMap<char,Vec<(Location,Quality)>>;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
