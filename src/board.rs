@@ -1,6 +1,5 @@
 use std::collections::{HashMap, VecDeque};
 use std::cmp::{min,max};
-use std::fmt::Alignment::Right;
 use rand::thread_rng;
 use rand::seq::SliceRandom;
 use crate::board::Direction::RIGHT;
@@ -21,53 +20,19 @@ enum Direction {
     RIGHT
 }
 
-pub fn place(board: &mut BoardType, char_map: &mut LocationMap, word: &str) {
-    for letter in word.chars(){
-        if char_map.contains_key(&letter) {
-            // FIXME - placeholder | implement: words crossing over                     
-            println!("TODO");
-            return;
-        }
-    }
-    
-    let height = board.len();
-    let width = board[0].len();
-
-    // if letters in word not found 
-    let place_y = height/2;
-    let mut place_x = width/2;
-    for letter in word.chars(){
-
-        // FIXME - placeholder | implement: find a free spot of word.len()
-                 
-        board[place_y][place_x] = letter;
-
-        if let Some(locations) = char_map.get_mut(&letter) {
-            locations.push((place_y,place_x));
-        }
-        else {
-            char_map.insert(letter,vec![(place_y,place_x)]);
-        }
-
-        place_x+=1;
-    }
-}
-
-
-pub fn return_crossword (list : &mut Vec<&str>){
+pub fn return_crossword (list : &mut Vec<&str>) -> BoardType {
     let mut best_board : Vec<Vec<char>>;
-    let mut best_pos : (Location, Location) = ((0,0),(0, 0));
-    let mut count = 0;
+    let mut best_pos : ((i32,i32), (i32,i32));
 
-    while count < SHUFFLE_COUNT{
-        let cur_board = generate_crossword(list);
-        let pos : (Location, Location) = find_borders(&cur_board);
-        if count == 0 {
-            best_board = cur_board;
-            count += 1;
-            best_pos = pos.clone();
-            continue;
-        }
+    best_board = generate_crossword(list);
+    let ((a, b), (c, d)) = find_borders(&best_board);
+    best_pos = ((a as i32, b as i32), (c as i32, d as i32));
+
+    for _ in 0..SHUFFLE_COUNT {
+        let cur_board: Vec<Vec<char>> = generate_crossword(list);
+        let ((a, b), (c, d)) = find_borders(&best_board);
+        let pos = ((a as i32, b as i32), (c as i32, d as i32));
+        
         //find_borders -> start - right-uppper | end - left-lower
         let dist_best = (best_pos.0.1 - best_pos.1.1)*(best_pos.0.1 - best_pos.1.1) +
             (best_pos.0.0 - best_pos.1.0)*(best_pos.0.0 - best_pos.1.0);
@@ -77,11 +42,11 @@ pub fn return_crossword (list : &mut Vec<&str>){
             best_pos = pos;
             best_board = cur_board;
         }
-
-        count += 1;
     }
 
+    return best_board;
 }
+
 pub fn generate_crossword(list : &mut Vec<&str>) -> Vec<Vec<char>>{
     loop {
         let mut board: Vec<Vec<char>> = vec![vec![' '; START_WIDTH]; START_HEIGHT];
@@ -111,7 +76,8 @@ pub fn generate_crossword(list : &mut Vec<&str>) -> Vec<Vec<char>>{
         }
     }
 }
-pub fn best_placement(board: &mut BoardType, char_map: &mut LocationMap, word: &str) -> bool {
+
+fn best_placement(board: &mut BoardType, char_map: &mut LocationMap, word: &str) -> bool {
     let length = word.chars().count() as usize;
     let mut best : Option<(Quality, Location, Direction)> = None;
     if char_map.is_empty() { // first word on board
@@ -138,7 +104,8 @@ pub fn best_placement(board: &mut BoardType, char_map: &mut LocationMap, word: &
 
     false
 }
-pub fn best_for_letter(board: &mut BoardType, char_map: &[(Location, f32)], word: &str,
+
+fn best_for_letter(board: &mut BoardType, char_map: &[(Location, f32)], word: &str,
                        letter :&char, idx : usize) -> Option<(f32, Location, Direction)>{
     let height = board.len();
     let width = board[0].len();
@@ -178,7 +145,7 @@ pub fn best_for_letter(board: &mut BoardType, char_map: &[(Location, f32)], word
 
 }
 
-pub fn can_place(board: &mut BoardType, word: &str, idx : usize,
+fn can_place(board: &mut BoardType, word: &str, idx : usize,
                  start : Location, dir: Direction) -> bool{
     let length = word.chars().count() as usize;
     let height = board.len() as usize;
@@ -211,7 +178,7 @@ pub fn can_place(board: &mut BoardType, word: &str, idx : usize,
     true
 }
 
-pub fn place_from_point(board : &mut BoardType, char_map : &mut LocationMap,
+fn place_from_point(board : &mut BoardType, char_map : &mut LocationMap,
                     word : &str, mut start : Location, dir : Direction) {
     let length : f32 = word.chars().count() as f32;
 
@@ -247,7 +214,7 @@ pub fn find_borders(board: &Vec<Vec<char>>) -> (Location,Location){
                 value_found = true;
                 start = (min(row_idx,start.0),min(col_idx,start.1));
                 end = (max(row_idx,end.0),max(col_idx,end.1));
-                println!("{:?},{:?}",start,end)
+                // println!("{:?},{:?}",start,end)
             }
         }
     }
