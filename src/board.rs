@@ -116,8 +116,8 @@ fn best_for_letter(board: &mut BoardType, char_map: &[(Location, f32)], word: &s
 
     for (loc, q) in sorted_loc{
 
-        let dir = if (loc.0  > 0 && board[loc.0 - 1][loc.1] != ' ') ||
-            ((loc.0 + 1) <= height && board[loc.0 + 1][loc.1] != ' '){
+        let dir = if (loc.1 > 0 && board[loc.1 - 1][loc.0] != ' ') ||
+            ((loc.1 + 1) < height && board[loc.1 + 1][loc.0] != ' '){
             Direction::RIGHT
         } else{
             Direction::DOWN
@@ -125,12 +125,12 @@ fn best_for_letter(board: &mut BoardType, char_map: &[(Location, f32)], word: &s
 
         let start_loc = match dir{
             Direction::DOWN => {
-                if loc.0 < idx { continue; }
-                (loc.0 - idx, loc.1)
-            },
-            Direction::RIGHT => {
                 if loc.1 < idx { continue; }
                 (loc.0, loc.1 - idx)
+            },
+            Direction::RIGHT => {
+                if loc.0 < idx { continue; }
+                (loc.0 - idx, loc.1)
             }
         };
 
@@ -153,25 +153,25 @@ fn can_place(board: &mut BoardType, word: &str, idx : usize,
 
     match dir{
         Direction::DOWN => {
-            if  start.0 < 0 || start.0 > height{
+            if start.1 > height {
                 return false
             }
         }
         Direction::RIGHT =>{
-            if  start.1 < 0 || start.1 > width{
+            if start.0 > width {
                 return false
             }
         }
     }
 
     let mut location = start.clone();
-    for (idx, letter) in word.chars().enumerate() {
-        if board[location.0][location.1] != ' ' && board[location.0][location.1] != letter {
+    for (_idx, letter) in word.chars().enumerate() {
+        if board[location.1][location.0] != ' ' && board[location.1][location.0] != letter {
             return false;
         }
         match dir {
-            Direction::DOWN => location.0 += 1,
-            Direction::RIGHT => location.1 += 1,
+            Direction::DOWN => location.1 += 1,
+            Direction::RIGHT => location.0 += 1,
         }
     }
 
@@ -184,14 +184,14 @@ fn place_from_point(board : &mut BoardType, char_map : &mut LocationMap,
 
     for (idx, letter) in word.chars().enumerate() {
         //TODO: delete cross letter and his neibours
-        board[start.0][start.1] = letter;
+        board[start.1][start.0] = letter;
         let quality = (length / 2.0 - idx as f32).abs() / (length/2.0);
 
         char_map.entry(letter).or_insert(Vec::new()).push((start,quality));
 
         match dir{
-            Direction::DOWN => start.0 += 1,
-            Direction::RIGHT => start.1 += 1,
+            Direction::DOWN => start.1 += 1,
+            Direction::RIGHT => start.0 += 1,
             _ => {}
         }
     }
@@ -212,9 +212,8 @@ pub fn find_borders(board: &Vec<Vec<char>>) -> (Location,Location){
             }
             else {
                 value_found = true;
-                start = (min(row_idx,start.0),min(col_idx,start.1));
-                end = (max(row_idx,end.0),max(col_idx,end.1));
-                // println!("{:?},{:?}",start,end)
+                start = (min(col_idx, start.0), min(row_idx, start.1));
+                end = (max(col_idx, end.0), max(row_idx, end.1));
             }
         }
     }
@@ -228,9 +227,8 @@ pub fn find_borders(board: &Vec<Vec<char>>) -> (Location,Location){
 
 /// function that prints the crossword in certain range, including end point coordinates!
 pub fn print_crossword(board: &BoardType, start: Location, end: Location){
-
-    for row in &board[start.0 .. end.0+1]{                  // delete horizontally
-        let slice = &row[start.1 .. end.1+1];   
+    for row in &board[start.1 .. end.1+1]{
+        let slice = &row[start.0 .. end.0+1];   
 
         println!("{:?}",slice);
     }   
