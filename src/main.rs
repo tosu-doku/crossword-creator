@@ -7,10 +7,10 @@ mod gui;
 fn main() {
     let mut board: BoardType = vec![vec![' '; START_WIDTH as usize]; START_HEIGHT as usize];
 
-    let mut char_map: LocationMap = HashMap::new();
+    let mut char_map: LocationMap;
     
     let mut list_of_words: Vec<&str> = vec!["pies","konik","chomik"];
-    board = board::return_crossword(&mut list_of_words);
+    (board,char_map) = board::return_crossword(&mut list_of_words);
 
     board::print_crossword(&board, (0,0), (START_WIDTH-1,START_HEIGHT-1));
 
