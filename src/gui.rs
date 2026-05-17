@@ -1,8 +1,7 @@
-use fltk::{app::{self, screen_size}, enums::{Color,Font}, prelude::{GroupExt, TableExt, WidgetExt}, window};
+use fltk::{app::{self, screen_size}, draw, enums::{Color,Font}, prelude::*, widget::Widget, window};
 use fltk_table::{SmartTable, TableOpts};
 
 use crate::config::*;
-
 
 pub fn main(char_map : LocationMap){
     // create app
@@ -15,7 +14,7 @@ pub fn main(char_map : LocationMap){
 
     let mut win = window::Window::default();
     win.set_size(width, height);
-    win.make_resizable(true);
+    // win.make_resizable(true);
 
     let mut crossword_table = SmartTable::default()
         .size_of(&win)
@@ -27,11 +26,29 @@ pub fn main(char_map : LocationMap){
             cell_font_size: 20,
             editable: true,
             header_color: Color::Blue.lighter().lighter(),
+            // header_frame: FrameType::UpBox,
             ..Default::default()
         });
-    crossword_table.set_row_height_all(40);
-    crossword_table.set_col_width_all(40);
+    crossword_table.set_row_height_all(CELL_SIZE);
+    crossword_table.set_col_width_all(  CELL_SIZE);
     crossword_table.end();
+
+    draw_rect_down(&crossword_table,10,2);
+    draw_rect_right(&crossword_table,10,3);
+
+    
+    // redraw boxes on mouseEvents
+    let mut win_clone = win.clone();
+    crossword_table.handle(move |_, ev| {
+        match ev {
+            fltk::enums::Event::Push | fltk::enums::Event::Released | 
+            fltk::enums::Event::KeyDown | fltk::enums::Event::MouseWheel => {
+                win_clone.redraw(); 
+                true
+            }
+            _ => false,
+        }
+    });
     
     place_values(crossword_table, char_map);
 
@@ -40,6 +57,54 @@ pub fn main(char_map : LocationMap){
     win.set_pos(x_pos, y_pos);
     my_app.run().unwrap();
 }
+
+fn draw_rect_right(crossword_table : &SmartTable, x: i32,  y: i32){
+    let header_offset = CELL_SIZE; 
+    let cell_x = crossword_table.x() + header_offset + (x * CELL_SIZE);
+    let cell_y = crossword_table.y() + header_offset/2 + (y * CELL_SIZE); 
+
+    let mut triangle_cell = Widget::new(cell_x+1, cell_y, CELL_SIZE, CELL_SIZE, None);
+
+    triangle_cell.draw(|w| {
+        draw::set_line_style(draw::LineStyle::Solid, 2);
+        draw::set_draw_color(Color::Black);
+
+        // triangle
+        draw::begin_line();
+        draw::vertex(w.x() as f64, w.y() as f64);                                     // upper left corner
+        draw::vertex((w.x() + w.w() / 4) as f64, (w.y() + w.h() / 2) as f64);
+        draw::vertex(w.x() as f64, (w.y() + w.h()) as f64);                         // lower left corner
+        draw::vertex(w.x() as f64, w.y() as f64);                                     // upper left corner
+
+        draw::end_line();
+        
+        draw::set_line_style(draw::LineStyle::Solid, 1);
+    });
+}
+
+fn draw_rect_down(crossword_table : &SmartTable, x: i32,  y: i32){
+    let header_offset = CELL_SIZE; 
+    let cell_x = crossword_table.x() + header_offset + (x * CELL_SIZE);
+    let cell_y = crossword_table.y() + header_offset/2 + (y * CELL_SIZE); 
+
+    let mut triangle_cell = Widget::new(cell_x, cell_y-1, CELL_SIZE, CELL_SIZE, None);
+
+    triangle_cell.draw(|w| {
+        draw::set_line_style(draw::LineStyle::Solid, 2);
+        draw::set_draw_color(Color::Black);
+        
+        // triangle
+        draw::begin_line();
+        draw::vertex(w.x() as f64, w.y() as f64);                                   // upper left corner
+        draw::vertex((w.x() + w.w() / 2) as f64, (w.y() + w.h() / 4) as f64); 
+        draw::vertex((w.x()+w.w()) as f64, w.y() as f64);                        // upper right corner
+        draw::vertex(w.x() as f64, w.y() as f64);                                   // upper left corner
+        draw::end_line();
+        
+        draw::set_line_style(draw::LineStyle::Solid, 1);
+    });
+}
+
 
 /// map all values to crossword_table
 pub fn place_values(mut crossword_table : SmartTable, char_map : LocationMap){
