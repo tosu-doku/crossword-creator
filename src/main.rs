@@ -1,10 +1,7 @@
 mod input;
 mod board;
-// use std::collections::{HashMap};
-const START_HEIGHT: usize = 16;
-const START_WIDTH: usize = 16;
-
-type BoardType = Vec<Vec<char>>;
+mod config;
+use config::*;
 
 fn main() {
     let mut board: BoardType = vec![vec![' '; START_WIDTH as usize]; START_HEIGHT as usize];

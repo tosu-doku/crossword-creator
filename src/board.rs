@@ -1,17 +1,4 @@
-use std::collections::{HashMap, VecDeque};
-use std::cmp::{min,max};
-use rand::thread_rng;
-use rand::seq::SliceRandom;
-
-// export types to dependency.rs later
-type BoardType = Vec<Vec<char>>;
-type Location = (usize,usize);
-type Quality = f32;
-type LocationMap = HashMap<char,Vec<(Location,Quality)>>;
-
-const START_HEIGHT: usize = 16;
-const START_WIDTH: usize = 16;
-const SHUFFLE_COUNT: usize = 10;
+use crate::config::*;
 
 #[derive(Debug, Clone, Copy)]
 enum Direction {
