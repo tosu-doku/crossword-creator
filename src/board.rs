@@ -1,11 +1,5 @@
 use crate::config::*;
 
-#[derive(Debug, Clone, Copy)]
-enum Direction {
-    DOWN,
-    RIGHT
-}
-
 pub fn return_crossword (list : &mut Vec<&str>) -> (BoardType,LocationMap) {
     let mut best_board : Vec<Vec<char>>;
     let mut bb_char_map : LocationMap;

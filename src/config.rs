@@ -9,6 +9,13 @@ pub type Quality = f32;
 pub type LocationMap = HashMap<char,Vec<(Location)>>;
 pub type LocationMapWithQuality = HashMap<char,Vec<(Location,Quality)>>;
 
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+pub enum Direction {
+    DOWN,
+    RIGHT
+}
+
+
 pub const START_HEIGHT: usize = 16;
 pub const START_WIDTH: usize = 16;
 pub const SHUFFLE_COUNT: usize = 0;
