@@ -1,10 +1,8 @@
 use fltk::{app::{self, screen_size}, enums::{Color,Font}, prelude::{GroupExt, TableExt, WidgetExt}, window};
 use fltk_table::{SmartTable, TableOpts};
-use std::collections::HashMap;
 
-type LocationMap = HashMap<char,Vec<(usize,usize)>>;
-const START_HEIGHT: usize = 16;
-const START_WIDTH: usize = 16;
+use crate::config::*;
+
 
 pub fn main(char_map : LocationMap){
     // create app
@@ -51,7 +49,7 @@ pub fn place_values(mut crossword_table : SmartTable, char_map : LocationMap){
     for elem in char_map{
         let letter: &mut str = elem.0.encode_utf8(&mut tmp);
         for placement in elem.1{
-            crossword_table.set_cell_value(placement.0 as i32, placement.1 as i32, letter);
+            crossword_table.set_cell_value(placement.1 as i32, placement.0 as i32, letter);
         }
     }
 }

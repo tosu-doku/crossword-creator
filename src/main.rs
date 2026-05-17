@@ -9,7 +9,7 @@ fn main() {
 
     let mut char_map: LocationMap;
     
-    let mut list_of_words: Vec<&str> = vec!["pies","konik","chomik"];
+    let mut list_of_words: Vec<&str> = vec!["pies","konik","chomik","ptak","kot"];
     (board,char_map) = board::return_crossword(&mut list_of_words);
 
     board::print_crossword(&board, (0,0), (START_WIDTH-1,START_HEIGHT-1));

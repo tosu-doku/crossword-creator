@@ -57,23 +57,23 @@ pub fn generate_crossword(list : &mut Vec<&str>) -> (BoardType,LocationMap){
         let mut counter = 0;
 
         list.shuffle(&mut thread_rng());
-        let mut cur: VecDeque<&str> = list.iter().copied().collect();
+        let mut cur_words: VecDeque<&str> = list.iter().copied().collect();
 
-        while !cur.is_empty() {
-            let word = cur.pop_front().unwrap();
+        while !cur_words.is_empty() {
+            let word = cur_words.pop_front().unwrap();
 
             if !best_placement(&mut board, &mut char_map, word) {
                 counter+=1;
-                cur.push_back(word);
+                cur_words.push_back(word);
             } else{
                 counter = 0;
             }
 
-            if counter == cur.len(){
+            if counter == cur_words.len(){
                 break;
             }
         }
-        if cur.is_empty(){
+        if cur_words.is_empty(){
             return (board,convert_map(char_map));
         }
     }
