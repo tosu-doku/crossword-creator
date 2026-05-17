@@ -80,7 +80,7 @@ fn best_placement(board: &mut BoardType, char_map: &mut LocationMap, word: &str)
     let length = word.chars().count() as usize;
     let mut best : Option<(Quality, Location, Direction)> = None;
     if char_map.is_empty() { // first word on board
-        let start_x = (START_WIDTH / 2).saturating_sub(length);
+        let start_x = (START_WIDTH / 2).saturating_sub(length/2);
         let start: Location = (start_x, START_HEIGHT / 2);
         
         place_from_point(board, char_map, word, start, Direction::RIGHT) ;
