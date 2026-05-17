@@ -2,7 +2,6 @@ use std::collections::{HashMap, VecDeque};
 use std::cmp::{min,max};
 use rand::thread_rng;
 use rand::seq::SliceRandom;
-use crate::board::Direction::RIGHT;
 
 // export types to dependency.rs later
 type BoardType = Vec<Vec<char>>;
@@ -58,7 +57,7 @@ pub fn generate_crossword(list : &mut Vec<&str>) -> Vec<Vec<char>>{
         let mut cur: VecDeque<&str> = list.iter().copied().collect();
 
         while !cur.is_empty() {
-            let mut word = cur.pop_front().unwrap();
+            let word = cur.pop_front().unwrap();
 
             if !best_placement(&mut board, &mut char_map, word) {
                 counter+=1;
@@ -81,9 +80,10 @@ fn best_placement(board: &mut BoardType, char_map: &mut LocationMap, word: &str)
     let length = word.chars().count() as usize;
     let mut best : Option<(Quality, Location, Direction)> = None;
     if char_map.is_empty() { // first word on board
-        let start: Location = (START_WIDTH/2 - length, START_HEIGHT / 2);
+        let start_x = (START_WIDTH / 2).saturating_sub(length);
+        let start: Location = (start_x, START_HEIGHT / 2);
         
-        place_from_point(board, char_map, word, start, RIGHT) ;
+        place_from_point(board, char_map, word, start, Direction::RIGHT) ;
         return true;
     }
 
@@ -106,9 +106,9 @@ fn best_placement(board: &mut BoardType, char_map: &mut LocationMap, word: &str)
 }
 
 fn best_for_letter(board: &mut BoardType, char_map: &[(Location, f32)], word: &str,
-                       letter :&char, idx : usize) -> Option<(f32, Location, Direction)>{
+                       _letter :&char, idx : usize) -> Option<(f32, Location, Direction)>{
     let height = board.len();
-    let width = board[0].len();
+    // let width = board[0].len();
     let length = word.chars().count() as usize;
 
     let mut sorted_loc = char_map.to_vec();
@@ -138,16 +138,14 @@ fn best_for_letter(board: &mut BoardType, char_map: &[(Location, f32)], word: &s
             let quality = (length as f32 / 2.0 - idx as f32).abs() / (length as f32/2.0) as f32;
             return Some((q + quality, start_loc, dir));
         }
-
     }
 
     None
-
 }
 
-fn can_place(board: &mut BoardType, word: &str, idx : usize,
+fn can_place(board: &mut BoardType, word: &str, _idx : usize,
                  start : Location, dir: Direction) -> bool{
-    let length = word.chars().count() as usize;
+    //let length = word.chars().count() as usize;
     let height = board.len() as usize;
     let width = board[0].len() as usize;
 
@@ -192,7 +190,6 @@ fn place_from_point(board : &mut BoardType, char_map : &mut LocationMap,
         match dir{
             Direction::DOWN => start.1 += 1,
             Direction::RIGHT => start.0 += 1,
-            _ => {}
         }
     }
 }
