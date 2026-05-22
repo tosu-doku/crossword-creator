@@ -168,11 +168,16 @@ fn place_from_point(board : &mut BoardType, char_map : &mut LocationMap,
     let length : f32 = word.chars().count() as f32;
 
     for (idx, letter) in word.chars().enumerate() {
-        //TODO: delete cross letter and his neibours
-        board[start.1][start.0] = letter;
         let quality = (length / 2.0 - idx as f32).abs() / (length/2.0);
+        let location = char_map.entry(letter).or_default();
 
-        char_map.entry(letter).or_insert(Vec::new()).push((start,quality));
+
+        if let Some(idx) = location.iter().position(|(loc, _)| *loc == start) {
+            location.remove(idx);
+        } else{
+            location.push((start, quality));
+        }
+        board[start.1][start.0] = letter;
 
         match dir{
             Direction::DOWN => start.1 += 1,
