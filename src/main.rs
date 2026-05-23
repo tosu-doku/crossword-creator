@@ -5,16 +5,15 @@ use config::*;
 mod gui;
 
 fn main() {
-    let mut word_start_arrows: LocationMapDirection = HashMap::new();
     let mut list_of_words: Vec<&str> = vec!["pies","konik","chomik","ptak","kot"];
 
-    let (board,char_map) = board::return_crossword(&mut list_of_words,&mut word_start_arrows);
+    let (board,char_map, word_arrows) = board::return_crossword(&mut list_of_words);
 
     board::print_crossword(&board, (0,0), (START_WIDTH-1,START_HEIGHT-1));
 
     println!("{:?}",char_map);
 
-    gui::main(char_map, word_start_arrows);
+    gui::main(char_map, word_arrows);
 
     // let (start, end) = board::find_borders(&board);
     // board::print_crossword(&board, start, end);
