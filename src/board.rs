@@ -187,6 +187,7 @@ fn place_from_point(board : &mut BoardType, char_map : &mut LocationMapQuality,
 
         if let Some(idx) = location.iter().position(|(loc, _)| *loc == start) {
             location.remove(idx);
+            location.push((start, quality));
         } else{
             location.push((start, quality));
         }
