@@ -16,11 +16,6 @@ pub enum Direction {
     RIGHT
 }
 
-
 pub const START_HEIGHT: usize = 16;
 pub const START_WIDTH: usize = 16;
 pub const SHUFFLE_COUNT: usize = 10;
-
-// gui
-pub const CELL_SIZE: i32 = 40;
-

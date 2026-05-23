@@ -9,7 +9,7 @@ fn main() {
 
     let hints: Vec<&str> = vec!["robi hau","konik","chomik","ptak","kot"];
 
-    let hints_for_words: HashMap<&str, &str> = words.iter().zip(hints.iter()).map(|(&w, &h)| (w, h)).collect();
+    let hints_for_words: HashMap<String, String> = words.iter().zip(hints.iter()).map(|(&w, &h)| (w.to_string(), h.to_string())).collect();
 
     // println!("{:?}",words_with_hints);
 
@@ -24,24 +24,3 @@ fn main() {
     // let (start, end) = board::find_borders(&board);
     // board::print_crossword(&board, start, end);
 }
-
-/*
-fn placeWord(mut queue : VecDeque<String>) -> [[char; MAPSIZE]; MAPSIZE] {
-
-    // board::print_crossword(&board, start, end);
-    let mut arr : [[char; MAPSIZE];MAPSIZE] = [[' '; MAPSIZE];MAPSIZE];
-
-    if let Some(word) = queue.pop_front(){
-        let middle = Point {x : MAPSIZE as i32 /2, y : (MAPSIZE - word.len()) as i32 /2};
-        place(word, middle, 1, &mut arr, Direction::DOWN);
-    }
-
-    while !queue.is_empty(){
-        if let Some(word) = queue.pop_front(){
-
-        }
-    }
-
-    arr
-} 
-*/
