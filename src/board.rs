@@ -1,18 +1,18 @@
 use crate::config::*;
 
-pub fn return_crossword (list : &mut Vec<&str>) -> (BoardType,LocationMap,LocationMapDirection) {
+pub fn return_crossword (words : &mut Vec<&str>) -> (BoardType,LocationMap,LocationMapWord) {
     let mut best_board : Vec<Vec<char>>;
     let mut bb_char_map : LocationMap;
     let mut smallest_board : ((i32,i32), (i32,i32));
-    let mut best_arrows: LocationMapDirection;
+    let mut best_arrows: LocationMapWord;
 
 
-    (best_board, bb_char_map, best_arrows) = generate_crossword(list);
+    (best_board, bb_char_map, best_arrows) = generate_crossword(words);
     let ((a, b), (c, d)) = find_borders(&best_board);
     smallest_board = ((a as i32, b as i32), (c as i32, d as i32));
 
     for _ in 0..SHUFFLE_COUNT {
-        let (cur_board, char_map, arrows) = generate_crossword(list);
+        let (cur_board, char_map, arrows) = generate_crossword(words);
         let ((a, b), (c, d)) = find_borders(&best_board);
         let pos = ((a as i32, b as i32), (c as i32, d as i32));
         
@@ -46,16 +46,16 @@ fn convert_map(old_map: LocationMapQuality) -> LocationMap {
         .collect()
 }
 
-pub fn generate_crossword(list : &mut Vec<&str>) -> (BoardType,LocationMap,LocationMapDirection){
+pub fn generate_crossword(words : &mut Vec<&str>) -> (BoardType,LocationMap,LocationMapWord){
     loop {
         let mut board: Vec<Vec<char>> = vec![vec![' '; START_WIDTH]; START_HEIGHT];
         let mut char_map: LocationMapQuality = HashMap::new();
-        let mut arrows: LocationMapDirection = HashMap::new();
+        let mut arrows: LocationMapWord = HashMap::new();
 
         let mut counter = 0;
 
-        list.shuffle(&mut thread_rng());
-        let mut cur_words: VecDeque<&str> = list.iter().copied().collect();
+        words.shuffle(&mut thread_rng());
+        let mut cur_words: VecDeque<&str> = words.iter().copied().collect();
 
         while !cur_words.is_empty() {
             let word = cur_words.pop_front().unwrap();
@@ -63,7 +63,7 @@ pub fn generate_crossword(list : &mut Vec<&str>) -> (BoardType,LocationMap,Locat
             if let Some(word_placement) = best_placement(&mut board, &mut char_map, word) {
                 let pos = word_placement.1;
                 let dir = word_placement.2;
-                arrows.entry(dir).or_insert(Vec::new()).push(pos);
+                arrows.entry(dir).or_insert(Vec::new()).push((pos,word.to_string()));
                 counter = 0;
             } else {
                 counter+=1;

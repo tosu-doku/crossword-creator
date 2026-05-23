@@ -5,9 +5,15 @@ use config::*;
 mod gui;
 
 fn main() {
-    let mut list_of_words: Vec<&str> = vec!["pies","konik","chomik","ptak","kot"];
+    let mut words: Vec<&str> = vec!["pies","konik","chomik","ptak","kot"];
 
-    let (board,char_map, word_arrows) = board::return_crossword(&mut list_of_words);
+    let hints: Vec<&str> = vec!["robi hau","konik","chomik","ptak","kot"];
+
+    let words_with_hints: Vec<(&str, &str)>= words.iter().zip(hints.iter()).map(|(&w, &h)| (w, h)).collect();
+
+    // println!("{:?}",words_with_hints);
+
+    let (board,char_map, word_arrows) = board::return_crossword(&mut words);
 
     board::print_crossword(&board, (0,0), (START_WIDTH-1,START_HEIGHT-1));
 

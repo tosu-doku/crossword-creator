@@ -3,7 +3,7 @@ use fltk_table::{SmartTable, TableOpts};
 
 use crate::config::*;
 
-pub fn main(char_map : LocationMap, arrows : LocationMapDirection){
+pub fn main(char_map : LocationMap, arrows : LocationMapWord){
     // create app
     let my_app: app::App = app::App::default().with_scheme(app::Scheme::Base);
     
@@ -24,7 +24,7 @@ pub fn main(char_map : LocationMap, arrows : LocationMapDirection){
             cols: START_WIDTH as i32,
             cell_font: Font::by_index(1),
             cell_font_size: 20,
-            editable: true,
+            // editable: true,
             header_color: Color::Blue.lighter().lighter(),
             // header_frame: FrameType::UpBox,
             ..Default::default()
@@ -117,8 +117,9 @@ pub fn place_values(mut crossword_table : SmartTable, char_map : LocationMap){
     }
 }
 
-fn draw_arrows(crossword_table : &SmartTable, arrows : LocationMapDirection){
-    for (dir,locations) in arrows{
+fn draw_arrows(crossword_table : &SmartTable, arrows : LocationMapWord){
+    for (dir,words_info) in arrows{
+        let locations : Vec<Location> = words_info.iter().map(|(loc, _)| *loc).collect();
         match dir {
             Direction::DOWN => {
                 for location in locations{
