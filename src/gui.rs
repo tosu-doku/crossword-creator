@@ -10,6 +10,10 @@ pub const DIRECTION_HEADER_FONT_SIZE : i32 = 16;
 pub const HINT_HEIGHT : i32 = 20;
 pub const HINT_WIDTH : i32 = 100;
 
+pub const HEADER_OFFSET : i32 = CELL_SIZE;
+
+pub const NUMBER_FONT_SIZE : i32 = 18;
+
 
 pub fn main(char_map : LocationMap, arrows : LocationMapWord, hints_for_words : HashMap<&str,&str>){
     // create app
@@ -55,7 +59,7 @@ pub fn main(char_map : LocationMap, arrows : LocationMapWord, hints_for_words : 
         }
     });
 
-    draw_arrows(&crossword_table, arrows.clone());
+    draw_arrows_numbers(&crossword_table, arrows.clone());
 
     // word hints
     let hints_width = 200;
@@ -96,11 +100,7 @@ pub fn main(char_map : LocationMap, arrows : LocationMapWord, hints_for_words : 
     my_app.run().unwrap();
 }
 
-fn draw_rect_right(crossword_table : &SmartTable, x: i32,  y: i32){
-    let header_offset = CELL_SIZE; 
-    let cell_x = crossword_table.x() + header_offset + (x * CELL_SIZE);
-    let cell_y = crossword_table.y() + header_offset/2 + (y * CELL_SIZE); 
-
+fn draw_rect_right(cell_x: i32,  cell_y: i32){
     let mut triangle_cell = Widget::new(cell_x+1, cell_y, CELL_SIZE, CELL_SIZE, None);
 
     triangle_cell.draw(|w| {
@@ -110,8 +110,8 @@ fn draw_rect_right(crossword_table : &SmartTable, x: i32,  y: i32){
         // triangle
         draw::begin_line();
         draw::vertex(w.x() as f64, w.y() as f64);                                     // upper left corner
-        draw::vertex((w.x() + w.w() / 4) as f64, (w.y() + w.h() / 2) as f64);
-        draw::vertex(w.x() as f64, (w.y() + w.h()) as f64);                         // lower left corner
+        draw::vertex((w.x() + w.w() / 5) as f64, (w.y() + w.h() / 2) as f64);
+        draw::vertex(w.x() as f64, (w.y() + w.h() - 1) as f64);                     // lower left corner
         draw::vertex(w.x() as f64, w.y() as f64);                                     // upper left corner
 
         draw::end_line();
@@ -120,11 +120,7 @@ fn draw_rect_right(crossword_table : &SmartTable, x: i32,  y: i32){
     });
 }
 
-fn draw_rect_down(crossword_table : &SmartTable, x: i32,  y: i32){
-    let header_offset = CELL_SIZE; 
-    let cell_x = crossword_table.x() + header_offset + (x * CELL_SIZE);
-    let cell_y = crossword_table.y() + header_offset/2 + (y * CELL_SIZE); 
-
+fn draw_rect_down(cell_x: i32, cell_y: i32){
     let mut triangle_cell = Widget::new(cell_x, cell_y-1, CELL_SIZE, CELL_SIZE, None);
 
     triangle_cell.draw(|w| {
@@ -134,7 +130,7 @@ fn draw_rect_down(crossword_table : &SmartTable, x: i32,  y: i32){
         // triangle
         draw::begin_line();
         draw::vertex(w.x() as f64, w.y() as f64);                                   // upper left corner
-        draw::vertex((w.x() + w.w() / 2) as f64, (w.y() + w.h() / 4) as f64); 
+        draw::vertex((w.x() + w.w() / 2) as f64, (w.y() + w.h() / 5) as f64); 
         draw::vertex((w.x()+w.w()) as f64, w.y() as f64);                        // upper right corner
         draw::vertex(w.x() as f64, w.y() as f64);                                   // upper left corner
         draw::end_line();
@@ -157,18 +153,23 @@ pub fn place_values(mut crossword_table : SmartTable, char_map : LocationMap){
     }
 }
 
-fn draw_arrows(crossword_table : &SmartTable, arrows : LocationMapWord){
+fn draw_arrows_numbers(crossword_table : &SmartTable, arrows : LocationMapWord){
     for (dir,words_info) in arrows{
         let locations : Vec<Location> = words_info.iter().map(|(loc, _)| *loc).collect();
-        match dir {
-            Direction::DOWN => {
-                for location in locations{
-                    draw_rect_down(crossword_table,location.0 as i32,location.1 as i32);
-                }
-            },
-            Direction::RIGHT => {
-                for location in locations{
-                    draw_rect_right(crossword_table,location.0 as i32,location.1 as i32);
+        for (mut idx,location) in locations.iter().enumerate(){
+            idx+=1;
+            let cell_x: i32 = crossword_table.x() + HEADER_OFFSET + (location.0 as i32  * CELL_SIZE);
+            let cell_y: i32 = crossword_table.y() + HEADER_OFFSET/2 + (location.1 as i32 * CELL_SIZE); 
+            match dir {
+                Direction::DOWN => {
+                        draw_rect_down(cell_x,cell_y);
+                        frame::Frame::new(cell_x + CELL_SIZE * 3/4 - 1, cell_y + CELL_SIZE * 3/5, 10, 10, 
+                            format!("{idx}").as_str()).set_label_size(NUMBER_FONT_SIZE);
+                },
+                Direction::RIGHT => {
+                        draw_rect_right(cell_x,cell_y);
+                        frame::Frame::new(cell_x + CELL_SIZE * 3/4 - 1, cell_y + 3, 10, 10, 
+                            format!("{idx}").as_str()).set_label_size(NUMBER_FONT_SIZE);
                 }
             }
         }
