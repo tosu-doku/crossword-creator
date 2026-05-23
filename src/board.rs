@@ -56,11 +56,14 @@ pub fn generate_crossword(list : &mut Vec<&str>, arrows: &mut LocationMapDirecti
         while !cur_words.is_empty() {
             let word = cur_words.pop_front().unwrap();
 
-            if !best_placement(&mut board, &mut char_map, word, arrows) {
+            if let Some(word_placement) = best_placement(&mut board, &mut char_map, word) {
+                let pos = word_placement.1;
+                let dir = word_placement.2;
+                arrows.entry(dir).or_insert(Vec::new()).push(pos);
+                counter = 0;
+            } else {
                 counter+=1;
                 cur_words.push_back(word);
-            } else{
-                counter = 0;
             }
 
             if counter == cur_words.len(){
@@ -73,7 +76,7 @@ pub fn generate_crossword(list : &mut Vec<&str>, arrows: &mut LocationMapDirecti
     }
 }
 
-fn best_placement(board: &mut BoardType, char_map: &mut LocationMapQuality, word: &str, arrows: &mut LocationMapDirection) -> bool {
+fn best_placement(board: &mut BoardType, char_map: &mut LocationMapQuality, word: &str) -> Option<(Quality, Location, Direction)> {
     let length = word.chars().count() as usize;
     let mut best : Option<(Quality, Location, Direction)> = None;
     if char_map.is_empty() { // first word on board
@@ -81,9 +84,8 @@ fn best_placement(board: &mut BoardType, char_map: &mut LocationMapQuality, word
         let start_y = START_HEIGHT / 2;
         let start: Location = (start_x, start_y);
         
-        arrows.entry(Direction::RIGHT).or_insert(Vec::new()).push((start_x,start_y));
         place_from_point(board, char_map, word, start, Direction::RIGHT) ;
-        return true;
+        return Some((0.0,start,Direction::RIGHT));
     }
 
     for (idx, letter) in word.chars().enumerate() {
@@ -97,12 +99,11 @@ fn best_placement(board: &mut BoardType, char_map: &mut LocationMapQuality, word
     }
 
     if let Some((_, pos, dir)) = best{
-        arrows.entry(dir).or_insert(Vec::new()).push(pos);
         place_from_point(board, char_map, word, pos, dir);
-        return true;
+        return best;
     }
 
-    false
+    None
 }
 
 fn best_for_letter(board: &mut BoardType, char_map: &[(Location, f32)], word: &str,
