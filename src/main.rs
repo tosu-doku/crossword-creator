@@ -9,7 +9,7 @@ fn main() {
 
     let hints: Vec<&str> = vec!["robi hau","konik","chomik","ptak","kot"];
 
-    let words_with_hints: Vec<(&str, &str)>= words.iter().zip(hints.iter()).map(|(&w, &h)| (w, h)).collect();
+    let hints_for_words: HashMap<&str, &str> = words.iter().zip(hints.iter()).map(|(&w, &h)| (w, h)).collect();
 
     // println!("{:?}",words_with_hints);
 
@@ -19,7 +19,7 @@ fn main() {
 
     println!("{:?}",char_map);
 
-    gui::main(char_map, word_arrows);
+    gui::main(char_map, word_arrows,hints_for_words);
 
     // let (start, end) = board::find_borders(&board);
     // board::print_crossword(&board, start, end);

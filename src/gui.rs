@@ -1,16 +1,24 @@
-use fltk::{app::{self, screen_size}, draw, enums::{Color,Font}, prelude::*, widget::Widget, window};
+use fltk::{app::{self, screen_size}, draw, enums::{Color,Font, FrameType}, frame, group, prelude::*, widget::Widget, window};
 use fltk_table::{SmartTable, TableOpts};
 
 use crate::config::*;
 
-pub fn main(char_map : LocationMap, arrows : LocationMapWord){
+pub const DIRECTION_HEADER_HEIGHT : i32 = 20;
+pub const DIRECTION_HEADER_WIDTH : i32 = 100;
+pub const DIRECTION_HEADER_FONT_SIZE : i32 = 16;
+
+pub const HINT_HEIGHT : i32 = 20;
+pub const HINT_WIDTH : i32 = 100;
+
+
+pub fn main(char_map : LocationMap, arrows : LocationMapWord, hints_for_words : HashMap<&str,&str>){
     // create app
     let my_app: app::App = app::App::default().with_scheme(app::Scheme::Base);
     
     let x_pos: i32 = ((screen_size().0)/4.0) as i32;
-    let y_pos: i32 = ((screen_size().1)/4.0) as i32;
+    let y_pos: i32 = ((screen_size().1)/6.0) as i32;
     let width: i32 = ((screen_size().0)/2.0) as i32;
-    let height: i32 = ((screen_size().1)/2.0) as i32;
+    let height: i32 = ((screen_size().1)/1.5) as i32;
 
     let mut win = window::Window::default();
     win.set_size(width, height);
@@ -18,6 +26,7 @@ pub fn main(char_map : LocationMap, arrows : LocationMapWord){
 
     let mut crossword_table = SmartTable::default()
         .size_of(&win)
+        // .with_size(win.width()-100, win.height())
         .center_of_parent()
         .with_opts(TableOpts {
             rows: START_HEIGHT as i32,
@@ -33,7 +42,7 @@ pub fn main(char_map : LocationMap, arrows : LocationMapWord){
     crossword_table.set_col_width_all(  CELL_SIZE);
     crossword_table.end();
 
-        // redraw boxes on mouseEvents
+    // redraw boxes on mouseEvents
     let mut win_clone = win.clone();
     crossword_table.handle(move |_, ev| {
         match ev {
@@ -45,8 +54,39 @@ pub fn main(char_map : LocationMap, arrows : LocationMapWord){
             _ => false,
         }
     });
-    
-    draw_arrows(&crossword_table, arrows);
+
+    draw_arrows(&crossword_table, arrows.clone());
+
+    // word hints
+    let hints_width = 200;
+    let mut _hints_wrapper = group::Pack::new(crossword_table.width()-hints_width, 0,hints_width,200,"hints");
+
+    for (dir,words_info) in arrows{
+        let words : Vec<String> = words_info.into_iter().map(|(_, w)| w).collect();
+
+        let mut direction_header = match dir {
+            Direction::DOWN => frame::Frame::new(0, 0, DIRECTION_HEADER_WIDTH, DIRECTION_HEADER_HEIGHT, "PIONOWO"),
+            Direction::RIGHT => frame::Frame::new(0, 0, DIRECTION_HEADER_WIDTH, DIRECTION_HEADER_HEIGHT, "POZIOMO")
+        };
+        direction_header.set_frame(FrameType::BorderBox);
+        direction_header.set_label_size(DIRECTION_HEADER_FONT_SIZE);
+        direction_header.set_color(Color::from_rgb(185, 156, 230));
+
+        for (mut idx,word) in words.iter().enumerate(){
+            if let Some(hint_for_word) = hints_for_words.get(word.as_str()){
+                idx+=1;
+                let hint: String = format!("{idx} - {hint_for_word}");
+                let mut frame = frame::Frame::new(0, 0, HINT_WIDTH, HINT_HEIGHT, hint.as_str());
+                frame.set_frame(FrameType::FlatBox);
+                frame.set_color(Color::Blue.lighter().lighter().lighter());
+            }
+        }
+        frame::Frame::new(0, 0, DIRECTION_HEADER_WIDTH, DIRECTION_HEADER_HEIGHT, ""); //spacing between hint directions
+    }
+
+    println!("{:?}",crossword_table.width());
+
+    _hints_wrapper.end();
 
     place_values(crossword_table, char_map);
 
