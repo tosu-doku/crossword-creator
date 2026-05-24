@@ -8,12 +8,12 @@ pub fn return_crossword (words : &mut Vec<&str>) -> (BoardType,LocationMap,Locat
 
 
     (best_board, bb_char_map, best_arrows) = generate_crossword(words);
-    let ((a, b), (c, d)) = find_borders(&best_board);
+    let ((a, b), (c, d)) = find_borders(bb_char_map.clone());
     smallest_board = ((a as i32, b as i32), (c as i32, d as i32));
 
     for _ in 0..SHUFFLE_COUNT {
         let (cur_board, char_map, arrows) = generate_crossword(words);
-        let ((a, b), (c, d)) = find_borders(&best_board);
+        let ((a, b), (c, d)) = find_borders(char_map.clone());
         let pos = ((a as i32, b as i32), (c as i32, d as i32));
         
         //find_borders -> start - right-uppper | end - left-lower
@@ -221,30 +221,24 @@ fn place_from_point(board : &mut BoardType, char_map : &mut LocationMapQuality,
 }
 
 /// this function aims to return 'edge' points containing the part of a crossword that is filled
-pub fn find_borders(board: &Vec<Vec<char>>) -> (Location,Location){
+pub fn find_borders(char_map : HashMap<char,Vec<Location>>) -> (Location,Location){
 
-    let mut value_found: bool = false;
-    let mut start: (usize,usize) = (board[0].len(),board.len()); 
-    let mut end: (usize, usize) = (0,0);
+    let first_location = char_map
+        .values()
+        .flatten()
+        .next()
+        .copied()
+        .expect("Nothing found, can't find borders!");
 
-    for row_idx in 0..board.len(){
-        for col_idx in 0..board[0].len(){
-            // skip if letter not found
-            if board[row_idx][col_idx] == ' ' {
-                continue;
-            }
-            else {
-                value_found = true;
-                start = (min(col_idx, start.0), min(row_idx, start.1));
-                end = (max(col_idx, end.0), max(row_idx, end.1));
-            }
+    let mut start: (usize,usize) = first_location; 
+    let mut end: (usize, usize) = first_location;
+
+    for (_,locations) in char_map{
+        for location in locations{
+            start = (min(location.0, start.0), min(location.1, start.1));
+            end = (max(location.0, end.0), max(location.1, end.1));
         }
     }
-
-    if !value_found {    // FIXME - TEMPORARY SOLUTION
-        panic!("Nothing found, can't find borders!")
-    }
-    
     return (start,end);
 }
 
