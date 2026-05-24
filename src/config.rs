@@ -21,3 +21,5 @@ pub const START_WIDTH: usize = 64;
 pub const SHUFFLE_COUNT: usize = 10;
 
 pub const WORD_PLACE_TRY_LIMIT: u8 = 50;
+
+pub const MINIMAL_BOARD_SIZE: usize = 7;

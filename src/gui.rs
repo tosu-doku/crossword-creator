@@ -12,13 +12,16 @@ pub const DIRECTION_HEADER_HEIGHT : i32 = 20;
 pub const DIRECTION_HEADER_WIDTH : i32 = 100;
 pub const DIRECTION_HEADER_FONT_SIZE : i32 = 16;
 
-pub const HINT_HEIGHT : i32 = 20;
-pub const HINT_WIDTH : i32 = 100;
-pub const HINTS_HEIGHT : i32 = 500;
-pub const HINTS_WIDTH : i32 = 150;
-pub const SEPERATE_HINTS_SPACE : i32 = 50;
+const HINT_HEIGHT : i32 = 20;
+const HINT_WIDTH : i32 = 100;
+const HINTS_HEIGHT : i32 = 500;
+const HINTS_WIDTH : i32 = 250;
+const SEPERATE_HINTS_SPACE : i32 = 50;
 
 pub const NUMBER_FONT_SIZE : i32 = 18;
+
+const INPUT_BOX_WIDTH : i32 = 300;
+const INPUT_BOX_HEIGHT : i32 = 80;
 
 pub fn main(){
     let my_app: app::App = app::App::default().with_scheme(app::Scheme::Base);
@@ -34,18 +37,18 @@ pub fn main(){
 
     let mut input_wrapper = group::Group::default().size_of(&win);
 
-    let mut input_box = input::Input::new(x_pos-100, y_pos-80, 300, 80,"");
+    let mut input_box = input::Input::new(x_pos-INPUT_BOX_WIDTH/2, y_pos-INPUT_BOX_HEIGHT, INPUT_BOX_WIDTH, INPUT_BOX_HEIGHT,"");
 
-    let mut input_description = frame::Frame::new(x_pos - 100, y_pos - 130, 300, 60, "");
-    input_description.set_label("If you want to add word to crossword, \nwrite: [WORD] [SPACE] [HINT]");
+    let mut input_description = frame::Frame::new(x_pos - INPUT_BOX_WIDTH/2, y_pos - INPUT_BOX_HEIGHT-70, 300, 60, "");
+    input_description.set_label("If you want to add word to crossword, \nwrite: word [SPACE] hint");
     input_description.set_label_font(enums::Font::HelveticaBold);
 
-    let mut add_button = button::Button::new(x_pos-50, y_pos, 100, 40, "Add word");
-    let mut start_button = button::Button::new(x_pos+50, y_pos, 100, 40, "Confirm");
-    let mut notification = frame::Frame::new(x_pos - 100, y_pos + 60, 300, 30, "");
+    let mut add_button = button::Button::new(x_pos-125, y_pos, 100, 40, "Add word");
+    let mut start_button = button::Button::new(x_pos+25, y_pos, 100, 40, "Confirm");
+    let mut notification = frame::Frame::new(x_pos - INPUT_BOX_WIDTH/2, y_pos + 60, 300, 30, "");
     notification.set_label_color(enums::Color::from_rgb(50, 100, 150));
 
-    let mut world_list = frame::Frame::new(x_pos - 100, y_pos + 130, 300, 60, "");
+    let mut world_list = frame::Frame::new(x_pos - INPUT_BOX_WIDTH/2, y_pos + 130, 300, 60, "");
     world_list.set_label("World list: ");
     world_list.set_align(enums::Align::Top | enums::Align::Center);
 
@@ -91,12 +94,12 @@ pub fn main(){
             let hint = input_hint.trim();
 
             if word.is_empty() || hint.is_empty() {
-                notification_clone.set_label_color(enums::Color::from_rgb(50, 100, 150));
+                notification_clone.set_label_color(enums::Color::from_rgb(150, 0, 0));
                 notification_clone.set_label(&format!("No text in hint or word."));
                 panic!("no text in hint");
             }
             if word.chars().count() == 1{
-                notification_clone.set_label_color(enums::Color::from_rgb(50, 100, 150));
+                notification_clone.set_label_color(enums::Color::from_rgb(150, 0, 0));
                 notification_clone.set_label(&format!("Word cannot be one letter."));
                 panic!("too short word");
             }
@@ -154,13 +157,14 @@ pub fn main(){
             shift_char_map(&mut char_map, lower_border.0, lower_border.1);
             shift_arrows(&mut arrows, lower_border.0, lower_border.1);
 
-            let mut x_size = upper_border.0 - lower_border.0;
-            let mut y_size = upper_border.1 - lower_border.1;
-            x_size = max(x_size,5);
-            y_size = max(y_size,5);
+            let mut board_size_x = upper_border.0 - lower_border.0;
+            let mut board_size_y = upper_border.1 - lower_border.1;
+            // minimal board size
+            board_size_x = max(board_size_x,MINIMAL_BOARD_SIZE);
+            board_size_y = max(board_size_y,MINIMAL_BOARD_SIZE);
 
-            let new_width = HINTS_WIDTH + SEPERATE_HINTS_SPACE + HEADER_OFFSET + CELL_SIZE * x_size as i32;
-            let new_height = HEADER_OFFSET + CELL_SIZE * y_size as i32;
+            let new_width = HINTS_WIDTH + SEPERATE_HINTS_SPACE + HEADER_OFFSET + CELL_SIZE * board_size_x as i32;
+            let new_height = HEADER_OFFSET + CELL_SIZE * board_size_y as i32;
 
             win.resize( win.x(),win.y(),new_width, new_height);
             win.make_resizable(false);
@@ -169,8 +173,8 @@ pub fn main(){
             crossword_wrapper2.resize(0, 0, new_width, new_height);
 
             crossword_wrapper2.begin();
-            let crossword_table = show_crossword(&win, char_map.clone(), arrows, hints_for_words, x_size as i32, y_size as i32);
-            let mut show_button = button::Button::new(new_width-110, new_height-50, 100, 40, "Show answers");
+            let crossword_table = show_crossword(&win, char_map.clone(), arrows, hints_for_words, board_size_x as i32, board_size_y as i32);
+            let mut show_button = button::Button::new(new_width-HINTS_WIDTH+40, new_height-50, HINTS_WIDTH-50, 40, "Show answers");
 
             let crossword_table2 = crossword_table.clone();
             let char_map2 = char_map.clone();
