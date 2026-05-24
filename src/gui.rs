@@ -21,6 +21,10 @@ pub fn main(){
 
     let mut input_box = input::Input::new(x_pos-100, y_pos-80, 300, 80,"");
 
+    let mut input_description = frame::Frame::new(x_pos - 100, y_pos - 130, 300, 60, "");;
+    input_description.set_label("If you want to add word to crossword, \nwrite: [WORD] [SPACE] [HINT]");
+    input_description.set_label_font(enums::Font::HelveticaBold);
+
     let mut add_button = button::Button::new(x_pos-50, y_pos, 100, 40, "Dodaj słowo");
     let mut start_button = button::Button::new(x_pos+50, y_pos, 100, 40, "Zatwierdź");
     let mut notification = frame::Frame::new(x_pos - 100, y_pos + 60, 300, 30, "");
@@ -40,6 +44,7 @@ pub fn main(){
     // Rc - let multiple owners | RefCall - allow for modification in deeper scope 
     let input_words = Rc::new(RefCell::new(Vec::<String>::new()));
     let input_hints = Rc::new(RefCell::new(Vec::<String>::new()));
+    let input_description = notification.clone();
 
     let input_words_c1 = Rc::clone(&input_words);
     let input_hints_c1 = Rc::clone(&input_hints);
