@@ -16,6 +16,6 @@ pub enum Direction {
     RIGHT
 }
 
-pub const START_HEIGHT: usize = 16;
-pub const START_WIDTH: usize = 16;
+pub const START_HEIGHT: usize = 32;
+pub const START_WIDTH: usize = 32;
 pub const SHUFFLE_COUNT: usize = 10;

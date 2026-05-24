@@ -1,28 +1,20 @@
 use fltk::{draw, enums::{Color,Font, FrameType}, frame, group, prelude::*, widget::Widget, window};
 use fltk_table::{SmartTable, TableOpts};
 
-use crate::config::*;
+use crate::{config::*,gui::*};
 
-pub const CELL_SIZE: i32 = 40;
-pub const HEADER_OFFSET : i32 = CELL_SIZE;
+pub fn show_crossword(win : &window::DoubleWindow, char_map : LocationMap, 
+                    arrows : LocationMapWord, hints_for_words : HashMap<String,String>,
+                    x_size : i32, y_size : i32){
 
-pub const DIRECTION_HEADER_HEIGHT : i32 = 20;
-pub const DIRECTION_HEADER_WIDTH : i32 = 100;
-pub const DIRECTION_HEADER_FONT_SIZE : i32 = 16;
+            println!("{:?}, {:?}",x_size,y_size);
 
-pub const HINT_HEIGHT : i32 = 20;
-pub const HINT_WIDTH : i32 = 100;
-
-pub const NUMBER_FONT_SIZE : i32 = 18;
-
-
-pub fn show_crossword(win : &window::DoubleWindow, char_map : LocationMap, arrows : LocationMapWord, hints_for_words : HashMap<String,String>){
     let mut crossword_table = SmartTable::default()
         .size_of(win)
-        .center_of_parent()
+        // .center_of_parent()
         .with_opts(TableOpts {
-            rows: START_HEIGHT as i32,
-            cols: START_WIDTH as i32,
+            rows: y_size,
+            cols: x_size,
             cell_font: Font::by_index(1),
             cell_font_size: 20,
             // editable: true,
@@ -52,8 +44,7 @@ pub fn show_crossword(win : &window::DoubleWindow, char_map : LocationMap, arrow
     draw_arrows_numbers(&crossword_table, arrows.clone());
 
     // word hints
-    let hints_width = 200;
-    let mut _hints_wrapper = group::Pack::new(crossword_table.width()-hints_width, 0,hints_width,200,"hints");
+    let mut _hints_wrapper = group::Pack::new(crossword_table.width()-HINTS_WIDTH, 0,HINTS_WIDTH,HINTS_HEIGHT,"hints");
 
     for (dir,words_info) in arrows{
         let words : Vec<String> = words_info.into_iter().map(|(_, w)| w).collect();

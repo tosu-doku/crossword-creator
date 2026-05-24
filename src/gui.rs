@@ -1,9 +1,24 @@
-use std::rc::Rc;
-use std::cell::RefCell;
+use std::{rc::Rc,cell::RefCell};
 use fltk::{app::{self, screen_size}, button, enums, frame, group, input, prelude::*, window};
 
 mod crossword;
-use crate::{config::*, board, gui::crossword::show_crossword};
+use crate::{board::{self, find_borders, shift_char_map, shift_arrows}, config::*, gui::crossword::show_crossword};
+
+// crossword options
+pub const CELL_SIZE: i32 = 40;
+pub const HEADER_OFFSET : i32 = CELL_SIZE;
+
+pub const DIRECTION_HEADER_HEIGHT : i32 = 20;
+pub const DIRECTION_HEADER_WIDTH : i32 = 100;
+pub const DIRECTION_HEADER_FONT_SIZE : i32 = 16;
+
+pub const HINT_HEIGHT : i32 = 20;
+pub const HINT_WIDTH : i32 = 100;
+pub const HINTS_HEIGHT : i32 = 500;
+pub const HINTS_WIDTH : i32 = 150;
+pub const SEPERATE_HINTS_SPACE : i32 = 50;
+
+pub const NUMBER_FONT_SIZE : i32 = 18;
 
 pub fn main(){
     let my_app: app::App = app::App::default().with_scheme(app::Scheme::Base);
@@ -15,7 +30,7 @@ pub fn main(){
 
     let mut win: window::DoubleWindow = window::Window::default();
     win.set_size(width, height);
-    // win.make_resizable(true);
+    win.make_resizable(true);
 
     let mut input_wrapper = group::Group::default().size_of(&win);
 
@@ -54,8 +69,23 @@ pub fn main(){
     let mut notification_clone = notification.clone();
     let mut world_list_clone = world_list.clone();
 
-    add_button.set_callback(move |_| {
+    let mut add_button_clone = add_button.clone();
 
+    input_box.handle(move |_, ev| {
+        match ev {
+            enums::Event::KeyDown => {
+                if app::event_key() == enums::Key::Enter {
+                    add_button_clone.do_callback();
+                    true 
+                } else {
+                    false 
+                }
+            }
+            _ => false
+        }
+    });
+
+    add_button.set_callback(move |_| {
         if let Some((input_word, input_hint)) = input_box.value().split_once(' '){
             let word = input_word.trim();
             let hint = input_hint.trim();
@@ -107,19 +137,43 @@ pub fn main(){
         
         let mut words_to_place: Vec<&str> = words.iter().map(|s| s.as_str()).collect();
 
-        let (_,char_map, arrows) = board::return_crossword(&mut words_to_place);
+        let (_,mut char_map,mut arrows) = board::return_crossword(&mut words_to_place);
 
-        let win2 = win.clone();
+        let (mut lower_border, mut upper_border) = find_borders(char_map.clone());
+        // spacing on left
+        lower_border.0 -= 1;
+        lower_border.1 -= 1;
+
+        // spacing on right
+        upper_border.0 += 2;
+        upper_border.1 += 2;
+
+        shift_char_map(&mut char_map, lower_border.0, lower_border.1);
+        shift_arrows(&mut arrows, lower_border.0, lower_border.1);
+
+        let mut x_size = upper_border.0 - lower_border.0;
+        let mut y_size = upper_border.1 - lower_border.1;
+        x_size = max(x_size,5);
+        y_size = max(y_size,5);
+
+        let new_width = HINTS_WIDTH + SEPERATE_HINTS_SPACE + HEADER_OFFSET + CELL_SIZE * x_size as i32;
+        let new_height = HEADER_OFFSET + CELL_SIZE * y_size as i32;
+
+        win.resize( win.x(),win.y(),new_width, new_height);
+        win.make_resizable(false);
 
         let mut crossword_wrapper2 = crossword_wrapper.clone();
+        crossword_wrapper2.resize(0, 0, new_width, new_height);
 
         crossword_wrapper2.begin();
-        show_crossword(&win2, char_map, arrows, hints_for_words);
+        show_crossword(&win, char_map, arrows, hints_for_words, x_size as i32, y_size as i32);
         crossword_wrapper2.end();
 
         input_wrapper.hide();
 
         crossword_wrapper2.show();
+        win.show();
+        app::redraw();
     });
 
     my_app.run().unwrap();
