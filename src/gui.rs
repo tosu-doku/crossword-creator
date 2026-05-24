@@ -1,6 +1,6 @@
 use std::rc::Rc;
 use std::cell::RefCell;
-use fltk::{app::{self, screen_size}, button, group, input, prelude::*, window};
+use fltk::{app::{self, screen_size}, button, enums, frame, group, input, prelude::*, window};
 
 mod crossword;
 use crate::{config::*, board, gui::crossword::show_crossword};
@@ -23,6 +23,8 @@ pub fn main(){
 
     let mut add_button = button::Button::new(x_pos-50, y_pos, 100, 40, "Dodaj słowo");
     let mut start_button = button::Button::new(x_pos+50, y_pos, 100, 40, "Zatwierdź");
+    let mut notification = frame::Frame::new(x_pos - 100, y_pos + 60, 300, 30, "");
+    notification.set_label_color(enums::Color::from_rgb(50, 100, 150));
 
     input_wrapper.end();
 
@@ -41,24 +43,33 @@ pub fn main(){
 
     let input_words_c1 = Rc::clone(&input_words);
     let input_hints_c1 = Rc::clone(&input_hints);
+    let mut notification_clone = notification.clone();
     // let mut input_box_clone = input_box.clone();
 
     add_button.set_callback(move |_| {
         // println!("{:?}",input_box.value());
 
         if let Some((input_word, input_hint)) = input_box.value().split_once(' '){
-            // TODO: add a visual notification that input has succeeded
+            let word = input_word.trim();
+            let hint = input_hint.trim();
+
+            if word.is_empty() || hint.is_empty() {
+                notification_clone.set_label_color(enums::Color::from_rgb(50, 100, 150));
+                notification_clone.set_label(&format!("No text in hint or word."));
+                panic!("no text in hint");
+            }
 
             // println!("{:?} {:?}",input_word,input_hint);
             input_words_c1.borrow_mut().push(input_word.to_string());
             input_hints_c1.borrow_mut().push(input_hint.to_string());
 
+            notification_clone.set_label_color(enums::Color::from_rgb(50, 100, 150));
+            notification_clone.set_label(&format!("Added: {}", input_word));
         } else {
-            // TODO: add a visual notification that input split hasn't succeeded
+            notification_clone.set_label_color(enums::Color::from_rgb(50, 100, 150));
+            notification_clone.set_label(&format!("No space between word and hint."));
             panic!("no space between word and hint");
         }
-
-        // TODO: add a check if word and hint are not empty, if so notify user
 
         input_box.set_value("")
     });
