@@ -32,14 +32,13 @@ pub fn return_crossword (words : &mut Vec<&str>) -> (BoardType,LocationMap,Locat
     return (best_board, bb_char_map, best_arrows);
 }
 
-fn convert_map(old_map: LocationMapQuality) -> LocationMap {
+fn map_drop_bonus<K>(old_map: HashMap<char, Vec<(Location,K)>>) -> LocationMap {
     old_map
         .into_iter() 
         // unpack to char, ver
         .map(|(letter, vec)| 
             {
-                let new_vec: Vec<(usize, usize)> = vec.into_iter().map(|(loc, _quality)| loc).collect();
-                
+                let new_vec: Vec<(usize, usize)> = vec.into_iter().map(|(loc, _)| loc).collect();
                 (letter, new_vec)
             }
         )
@@ -75,7 +74,7 @@ pub fn generate_crossword(words : &mut Vec<&str>) -> (BoardType,LocationMap,Loca
             }
         }
         if cur_words.is_empty(){
-            return (board,convert_map(char_map), arrows); 
+            return (board,map_drop_bonus(char_map), arrows); 
         }
     }
 }
@@ -249,4 +248,22 @@ pub fn _print_crossword(board: &BoardType, start: Location, end: Location){
 
         println!("{:?}",slice);
     }   
+}
+
+pub fn shift_char_map<K>(char_map : &mut HashMap<K,Vec<Location>>, x_shift : usize, y_shift : usize){
+    for (_,locations) in char_map{
+        for location in locations{
+            location.0 -= x_shift;
+            location.1 -= y_shift;
+        }
+    }
+}
+
+pub fn shift_arrows<K,T>(char_map : &mut HashMap<K,Vec<(Location,T)>>, x_shift : usize, y_shift : usize){
+    for (_,words_info) in char_map{
+        for (location,_) in words_info{
+            location.0 -= x_shift;
+            location.1 -= y_shift;
+        }
+    }
 }
