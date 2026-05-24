@@ -68,6 +68,11 @@ pub fn main(){
                 notification_clone.set_label(&format!("No text in hint or word."));
                 panic!("no text in hint");
             }
+            if word.chars().count() == 1{
+                notification_clone.set_label_color(enums::Color::from_rgb(50, 100, 150));
+                notification_clone.set_label(&format!("Word cannot be one letter."));
+                panic!("too short word");
+            }
 
             // println!("{:?} {:?}",input_word,input_hint);
             input_words_c1.borrow_mut().push(input_word.to_string());
