@@ -135,16 +135,31 @@ fn can_place(board: &mut BoardType, word: &str, _idx : usize,
     //let length = word.chars().count() as usize;
     let height = board.len() as usize;
     let width = board[0].len() as usize;
+    let length = word.chars().count() as usize;
 
     match dir{
         Direction::DOWN => {
             if start.1 > height {
                 return false
             }
+            //no word above and under the word
+            if start.1 > 0 && board[start.1 - 1][start.0] != ' ' {
+                return false
+            }
+            if start.1 + length < height && board[start.1 + length][start.0] != ' ' {
+                return false;
+            }
         }
         Direction::RIGHT =>{
             if start.0 > width {
                 return false
+            }
+            //no word right and left to word
+            if start.0 > 0 && board[start.1][start.0 - 1] != ' ' {
+                return false;
+            }
+            if start.0 + length < width && board[start.1][start.0 + length] != ' ' {
+                return false;
             }
         }
     }
