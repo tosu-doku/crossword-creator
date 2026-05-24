@@ -101,6 +101,9 @@ pub fn main(){
                 panic!("too short word");
             }
 
+            let word_len = word.len(); 
+            let input_hint = format!("{input_hint} ({word_len})");
+
             // println!("{:?} {:?}",input_word,input_hint);
             input_words_c1.borrow_mut().push(input_word.to_string());
             input_hints_c1.borrow_mut().push(input_hint.to_string());
