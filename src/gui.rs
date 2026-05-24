@@ -2,7 +2,7 @@ use std::{rc::Rc,cell::RefCell};
 use fltk::{app::{self, screen_size}, button, enums, frame, group, input, prelude::*, window};
 
 mod crossword;
-use crate::{board::{self, find_borders, shift_char_map, shift_arrows}, config::*, gui::crossword::show_crossword};
+use crate::{board::{self, find_borders, shift_arrows, shift_char_map}, config::*, gui::crossword::{place_values, show_crossword}};
 
 // crossword options
 pub const CELL_SIZE: i32 = 40;
@@ -169,7 +169,16 @@ pub fn main(){
             crossword_wrapper2.resize(0, 0, new_width, new_height);
 
             crossword_wrapper2.begin();
-            show_crossword(&win, char_map, arrows, hints_for_words, x_size as i32, y_size as i32);
+            let crossword_table = show_crossword(&win, char_map.clone(), arrows, hints_for_words, x_size as i32, y_size as i32);
+            let mut show_button = button::Button::new(new_width-110, new_height-50, 100, 40, "Show answers");
+
+            let crossword_table2 = crossword_table.clone();
+            let char_map2 = char_map.clone();
+
+            show_button.set_callback(move |_| { 
+                place_values(crossword_table2.clone(), char_map2.clone());
+                app::redraw();
+            });
             crossword_wrapper2.end();
 
             input_wrapper.hide();

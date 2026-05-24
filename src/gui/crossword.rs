@@ -5,7 +5,7 @@ use crate::{config::*,gui::*};
 
 pub fn show_crossword(win : &window::DoubleWindow, char_map : LocationMap, 
                     arrows : LocationMapWord, hints_for_words : HashMap<String,String>,
-                    x_size : i32, y_size : i32){
+                    x_size : i32, y_size : i32) -> SmartTable{
 
             println!("{:?}, {:?}",x_size,y_size);
 
@@ -71,7 +71,9 @@ pub fn show_crossword(win : &window::DoubleWindow, char_map : LocationMap,
 
     _hints_wrapper.end();
 
-    place_values(crossword_table, char_map);
+    place_value_borders(crossword_table.clone(), char_map);
+    
+    return crossword_table;
 }
 
 fn draw_triangle_right(cell_x: i32, cell_y: i32){
@@ -115,14 +117,20 @@ fn draw_triangle_down(cell_x: i32, cell_y: i32){
 
 
 /// map all values to crossword_table
-fn place_values(mut crossword_table : SmartTable, char_map : LocationMap){
-
+pub fn place_values(mut crossword_table : SmartTable, char_map : LocationMap){
     let mut tmp = [0; 4]; // buffor for char -> &str conversion
 
     for elem in char_map{
         let letter: &mut str = elem.0.encode_utf8(&mut tmp);
         for location in elem.1{
             crossword_table.set_cell_value(location.1 as i32, location.0 as i32, letter);
+        }
+    }
+}
+
+fn place_value_borders(mut crossword_table : SmartTable, char_map : LocationMap){
+    for elem in char_map{
+        for location in elem.1{
             crossword_table.set_cell_border_color(location.1 as i32, location.0 as i32, Color::Black);
         }
     }
