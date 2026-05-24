@@ -1,35 +1,34 @@
 use crate::config::*;
 
-pub fn return_crossword (words : &mut Vec<&str>) -> (BoardType,LocationMap,LocationMapWord) {
-    let mut best_board : Vec<Vec<char>>;
-    let mut bb_char_map : LocationMap;
+pub fn return_crossword (words : &mut Vec<&str>) -> Option<(LocationMap,LocationMapWord)> {
     let mut smallest_board : ((i32,i32), (i32,i32));
-    let mut best_arrows: LocationMapWord;
 
+    if let Some((mut _best_board,mut bb_char_map,mut best_arrows)) = generate_crossword(words){
+        let ((a, b), (c, d)) = find_borders(bb_char_map.clone());
+        smallest_board = ((a as i32, b as i32), (c as i32, d as i32));
 
-    (best_board, bb_char_map, best_arrows) = generate_crossword(words);
-    let ((a, b), (c, d)) = find_borders(bb_char_map.clone());
-    smallest_board = ((a as i32, b as i32), (c as i32, d as i32));
-
-    for _ in 0..SHUFFLE_COUNT {
-        let (cur_board, char_map, arrows) = generate_crossword(words);
-        let ((a, b), (c, d)) = find_borders(char_map.clone());
-        let pos = ((a as i32, b as i32), (c as i32, d as i32));
-        
-        //find_borders -> start - right-uppper | end - left-lower
-        let dist_best = (smallest_board.0.1 - smallest_board.1.1)*(smallest_board.0.1 - smallest_board.1.1) +
-            (smallest_board.0.0 - smallest_board.1.0)*(smallest_board.0.0 - smallest_board.1.0);
-        let dist_cur = (pos.0.1 - pos.1.1)*(pos.0.1 - pos.1.1) +
-            (pos.0.0 - pos.1.0)*(pos.0.0 - pos.1.0);
-        if dist_best < dist_cur {
-            smallest_board = pos;
-            best_board = cur_board;
-            bb_char_map = char_map;
-            best_arrows = arrows;
-        }
+        for _ in 0..SHUFFLE_COUNT {
+            if let Some((cur_board, char_map, arrows)) = generate_crossword(words){
+                let ((a, b), (c, d)) = find_borders(char_map.clone());
+                let pos = ((a as i32, b as i32), (c as i32, d as i32));
+                
+                //find_borders -> start - right-uppper | end - left-lower
+                let dist_best = (smallest_board.0.1 - smallest_board.1.1)*(smallest_board.0.1 - smallest_board.1.1) +
+                    (smallest_board.0.0 - smallest_board.1.0)*(smallest_board.0.0 - smallest_board.1.0);
+                let dist_cur = (pos.0.1 - pos.1.1)*(pos.0.1 - pos.1.1) +
+                    (pos.0.0 - pos.1.0)*(pos.0.0 - pos.1.0);
+                if dist_best < dist_cur {
+                    smallest_board = pos;
+                    _best_board = cur_board;
+                    bb_char_map = char_map;
+                    best_arrows = arrows;
+                }
+            }
+        }    
+        return Some((bb_char_map, best_arrows));
+    } else {
+        return None;
     }
-
-    return (best_board, bb_char_map, best_arrows);
 }
 
 fn map_drop_bonus<K>(old_map: HashMap<char, Vec<(Location,K)>>) -> LocationMap {
@@ -45,8 +44,13 @@ fn map_drop_bonus<K>(old_map: HashMap<char, Vec<(Location,K)>>) -> LocationMap {
         .collect()
 }
 
-pub fn generate_crossword(words : &mut Vec<&str>) -> (BoardType,LocationMap,LocationMapWord){
+pub fn generate_crossword(words : &mut Vec<&str>) -> Option<(BoardType,LocationMap,LocationMapWord)>{
+    let mut attempts = 0;
     loop {
+        attempts += 1;
+        if attempts >= WORD_PLACE_TRY_LIMIT{
+            return None;
+        }
         let mut board: Vec<Vec<char>> = vec![vec![' '; START_WIDTH]; START_HEIGHT];
         let mut char_map: LocationMapQuality = HashMap::new();
         let mut arrows: LocationMapWord = HashMap::new();
@@ -74,7 +78,7 @@ pub fn generate_crossword(words : &mut Vec<&str>) -> (BoardType,LocationMap,Loca
             }
         }
         if cur_words.is_empty(){
-            return (board,map_drop_bonus(char_map), arrows); 
+            return Some((board,map_drop_bonus(char_map), arrows)); 
         }
     }
 }

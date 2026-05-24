@@ -126,6 +126,7 @@ pub fn main(){
 
     let input_words_c2 = Rc::clone(&input_words);
     let input_hints_c2 = Rc::clone(&input_hints);
+    let mut notification_clone2 = notification.clone();
 
     start_button.set_callback(move |_| {
         let words = input_words_c2.borrow();
@@ -140,41 +141,46 @@ pub fn main(){
         
         let mut words_to_place: Vec<&str> = words.iter().map(|s| s.as_str()).collect();
 
-        let (_,mut char_map,mut arrows) = board::return_crossword(&mut words_to_place);
+        if let Some((mut char_map,mut arrows)) = board::return_crossword(&mut words_to_place){
+            let (mut lower_border, mut upper_border) = find_borders(char_map.clone());
+            // spacing on left
+            lower_border.0 -= 1;
+            lower_border.1 -= 1;
 
-        let (mut lower_border, mut upper_border) = find_borders(char_map.clone());
-        // spacing on left
-        lower_border.0 -= 1;
-        lower_border.1 -= 1;
+            // spacing on right
+            upper_border.0 += 2;
+            upper_border.1 += 2;
 
-        // spacing on right
-        upper_border.0 += 2;
-        upper_border.1 += 2;
+            shift_char_map(&mut char_map, lower_border.0, lower_border.1);
+            shift_arrows(&mut arrows, lower_border.0, lower_border.1);
 
-        shift_char_map(&mut char_map, lower_border.0, lower_border.1);
-        shift_arrows(&mut arrows, lower_border.0, lower_border.1);
+            let mut x_size = upper_border.0 - lower_border.0;
+            let mut y_size = upper_border.1 - lower_border.1;
+            x_size = max(x_size,5);
+            y_size = max(y_size,5);
 
-        let mut x_size = upper_border.0 - lower_border.0;
-        let mut y_size = upper_border.1 - lower_border.1;
-        x_size = max(x_size,5);
-        y_size = max(y_size,5);
+            let new_width = HINTS_WIDTH + SEPERATE_HINTS_SPACE + HEADER_OFFSET + CELL_SIZE * x_size as i32;
+            let new_height = HEADER_OFFSET + CELL_SIZE * y_size as i32;
 
-        let new_width = HINTS_WIDTH + SEPERATE_HINTS_SPACE + HEADER_OFFSET + CELL_SIZE * x_size as i32;
-        let new_height = HEADER_OFFSET + CELL_SIZE * y_size as i32;
+            win.resize( win.x(),win.y(),new_width, new_height);
+            win.make_resizable(false);
 
-        win.resize( win.x(),win.y(),new_width, new_height);
-        win.make_resizable(false);
+            let mut crossword_wrapper2 = crossword_wrapper.clone();
+            crossword_wrapper2.resize(0, 0, new_width, new_height);
 
-        let mut crossword_wrapper2 = crossword_wrapper.clone();
-        crossword_wrapper2.resize(0, 0, new_width, new_height);
+            crossword_wrapper2.begin();
+            show_crossword(&win, char_map, arrows, hints_for_words, x_size as i32, y_size as i32);
+            crossword_wrapper2.end();
 
-        crossword_wrapper2.begin();
-        show_crossword(&win, char_map, arrows, hints_for_words, x_size as i32, y_size as i32);
-        crossword_wrapper2.end();
+            input_wrapper.hide();
 
-        input_wrapper.hide();
+            crossword_wrapper2.show();
+        } else {
+            notification_clone2.set_label_color(enums::Color::from_rgb(255, 0, 0));
+            notification_clone2.set_label(&format!("Not all words can be placed"));
+            panic!("Not all words can be placed");
+        }
 
-        crossword_wrapper2.show();
         win.show();
         app::redraw();
     });

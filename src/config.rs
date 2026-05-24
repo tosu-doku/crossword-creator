@@ -19,3 +19,5 @@ pub enum Direction {
 pub const START_HEIGHT: usize = 32;
 pub const START_WIDTH: usize = 32;
 pub const SHUFFLE_COUNT: usize = 10;
+
+pub const WORD_PLACE_TRY_LIMIT: u8 = 50;
