@@ -25,12 +25,12 @@ pub fn main(){
     input_description.set_label("If you want to add word to crossword, \nwrite: [WORD] [SPACE] [HINT]");
     input_description.set_label_font(enums::Font::HelveticaBold);
 
-    let mut add_button = button::Button::new(x_pos-50, y_pos, 100, 40, "Dodaj słowo");
-    let mut start_button = button::Button::new(x_pos+50, y_pos, 100, 40, "Zatwierdź");
+    let mut add_button = button::Button::new(x_pos-50, y_pos, 100, 40, "Add word");
+    let mut start_button = button::Button::new(x_pos+50, y_pos, 100, 40, "Confirm");
     let mut notification = frame::Frame::new(x_pos - 100, y_pos + 60, 300, 30, "");
     notification.set_label_color(enums::Color::from_rgb(50, 100, 150));
 
-    let mut world_list = frame::Frame::new(x_pos - 100, y_pos + 130, 300, 60, "");;
+    let mut world_list = frame::Frame::new(x_pos - 100, y_pos + 130, 300, 60, "");
     world_list.set_label("World list: ");
     world_list.set_align(enums::Align::Top | enums::Align::Center);
 
@@ -48,16 +48,13 @@ pub fn main(){
     // Rc - let multiple owners | RefCall - allow for modification in deeper scope 
     let input_words = Rc::new(RefCell::new(Vec::<String>::new()));
     let input_hints = Rc::new(RefCell::new(Vec::<String>::new()));
-    let input_description = notification.clone();
 
     let input_words_c1 = Rc::clone(&input_words);
     let input_hints_c1 = Rc::clone(&input_hints);
     let mut notification_clone = notification.clone();
     let mut world_list_clone = world_list.clone();
-    // let mut input_box_clone = input_box.clone();
 
     add_button.set_callback(move |_| {
-        // println!("{:?}",input_box.value());
 
         if let Some((input_word, input_hint)) = input_box.value().split_once(' '){
             let word = input_word.trim();
@@ -86,7 +83,7 @@ pub fn main(){
             world_list_clone.set_label(&format!("World list:\n{}", words_string));
             world_list_clone.redraw()
         } else {
-            notification_clone.set_label_color(enums::Color::from_rgb(50, 100, 150));
+            notification_clone.set_label_color(enums::Color::from_rgb(150, 0, 0));
             notification_clone.set_label(&format!("No space between word and hint."));
             panic!("no space between word and hint");
         }
@@ -98,7 +95,7 @@ pub fn main(){
     let input_hints_c2 = Rc::clone(&input_hints);
 
     start_button.set_callback(move |_| {
-        let mut words = input_words_c2.borrow();
+        let words = input_words_c2.borrow();
         let hints = input_hints_c2.borrow();
         let hints_for_words: HashMap<String, String> = words
                         .iter()
@@ -110,7 +107,7 @@ pub fn main(){
         
         let mut words_to_place: Vec<&str> = words.iter().map(|s| s.as_str()).collect();
 
-        let (board,char_map, arrows) = board::return_crossword(&mut words_to_place);
+        let (_,char_map, arrows) = board::return_crossword(&mut words_to_place);
 
         let win2 = win.clone();
 

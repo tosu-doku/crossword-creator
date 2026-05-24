@@ -249,7 +249,7 @@ pub fn find_borders(board: &Vec<Vec<char>>) -> (Location,Location){
 }
 
 /// function that prints the crossword in certain range, including end point coordinates!
-pub fn print_crossword(board: &BoardType, start: Location, end: Location){
+pub fn _print_crossword(board: &BoardType, start: Location, end: Location){
     for row in &board[start.1 .. end.1+1]{
         let slice = &row[start.0 .. end.0+1];   
 

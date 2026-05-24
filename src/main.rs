@@ -1,7 +1,6 @@
-mod input;
 mod board;
 mod config;
-use config::*;
+// use config::*;
 mod gui;
 
 fn main() {

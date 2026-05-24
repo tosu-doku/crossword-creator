@@ -28,6 +28,8 @@ pub fn show_crossword(win : &window::DoubleWindow, char_map : LocationMap, arrow
             // editable: true,
             header_color: Color::Blue.lighter().lighter(),
             // header_frame: FrameType::UpBox,
+            cell_border_color: Color::White,
+            cell_selection_color: Color::White,
             ..Default::default()
         });
     crossword_table.set_row_height_all(CELL_SIZE);
@@ -57,8 +59,8 @@ pub fn show_crossword(win : &window::DoubleWindow, char_map : LocationMap, arrow
         let words : Vec<String> = words_info.into_iter().map(|(_, w)| w).collect();
 
         let mut direction_header = match dir {
-            Direction::DOWN => frame::Frame::new(0, 0, DIRECTION_HEADER_WIDTH, DIRECTION_HEADER_HEIGHT, "PIONOWO"),
-            Direction::RIGHT => frame::Frame::new(0, 0, DIRECTION_HEADER_WIDTH, DIRECTION_HEADER_HEIGHT, "POZIOMO")
+            Direction::DOWN => frame::Frame::new(0, 0, DIRECTION_HEADER_WIDTH, DIRECTION_HEADER_HEIGHT, "VERTICAL"),
+            Direction::RIGHT => frame::Frame::new(0, 0, DIRECTION_HEADER_WIDTH, DIRECTION_HEADER_HEIGHT, "HORIZONTAL")
         };
         direction_header.set_frame(FrameType::BorderBox);
         direction_header.set_label_size(DIRECTION_HEADER_FONT_SIZE);
@@ -81,9 +83,8 @@ pub fn show_crossword(win : &window::DoubleWindow, char_map : LocationMap, arrow
     place_values(crossword_table, char_map);
 }
 
-
-fn draw_rect_right(cell_x: i32,  cell_y: i32){
-    let mut triangle_cell = Widget::new(cell_x+1, cell_y, CELL_SIZE, CELL_SIZE, None);
+fn draw_triangle_right(cell_x: i32, cell_y: i32){
+    let mut triangle_cell = Widget::new(cell_x+1, cell_y-1, CELL_SIZE, CELL_SIZE, None);
 
     triangle_cell.draw(|w| {
         draw::set_line_style(draw::LineStyle::Solid, 2);
@@ -102,7 +103,7 @@ fn draw_rect_right(cell_x: i32,  cell_y: i32){
     });
 }
 
-fn draw_rect_down(cell_x: i32, cell_y: i32){
+fn draw_triangle_down(cell_x: i32, cell_y: i32){
     let mut triangle_cell = Widget::new(cell_x, cell_y-1, CELL_SIZE, CELL_SIZE, None);
 
     triangle_cell.draw(|w| {
@@ -129,8 +130,9 @@ fn place_values(mut crossword_table : SmartTable, char_map : LocationMap){
 
     for elem in char_map{
         let letter: &mut str = elem.0.encode_utf8(&mut tmp);
-        for placement in elem.1{
-            crossword_table.set_cell_value(placement.1 as i32, placement.0 as i32, letter);
+        for location in elem.1{
+            crossword_table.set_cell_value(location.1 as i32, location.0 as i32, letter);
+            crossword_table.set_cell_border_color(location.1 as i32, location.0 as i32, Color::Black);
         }
     }
 }
@@ -144,12 +146,12 @@ fn draw_arrows_numbers(crossword_table : &SmartTable, arrows : LocationMapWord){
             let cell_y: i32 = crossword_table.y() + HEADER_OFFSET/2 + (location.1 as i32 * CELL_SIZE); 
             match dir {
                 Direction::DOWN => {
-                        draw_rect_down(cell_x,cell_y);
+                        draw_triangle_down(cell_x,cell_y);
                         frame::Frame::new(cell_x + CELL_SIZE * 3/4 - 1, cell_y + CELL_SIZE * 3/5, 10, 10, 
                             format!("{idx}").as_str()).set_label_size(NUMBER_FONT_SIZE);
                 },
                 Direction::RIGHT => {
-                        draw_rect_right(cell_x,cell_y);
+                        draw_triangle_right(cell_x,cell_y);
                         frame::Frame::new(cell_x + CELL_SIZE * 3/4 - 1, cell_y + 3, 10, 10, 
                             format!("{idx}").as_str()).set_label_size(NUMBER_FONT_SIZE);
                 }
