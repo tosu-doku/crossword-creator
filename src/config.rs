@@ -6,8 +6,20 @@ pub use rand::seq::SliceRandom;
 pub type BoardType = Vec<Vec<char>>;
 pub type Location = (usize,usize);
 pub type Quality = f32;
-pub type LocationMap = HashMap<char,Vec<(Location,Quality)>>;
+pub type LocationMap = HashMap<char,Vec<Location>>;
+pub type LocationMapWord = HashMap<Direction,Vec<(Location,String)>>;
+pub type LocationMapQuality = HashMap<char,Vec<(Location,Quality)>>;
 
-pub const START_HEIGHT: usize = 16;
-pub const START_WIDTH: usize = 16;
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+pub enum Direction {
+    DOWN,
+    RIGHT
+}
+
+pub const START_HEIGHT: usize = 64;
+pub const START_WIDTH: usize = 64;
 pub const SHUFFLE_COUNT: usize = 10;
+
+pub const WORD_PLACE_TRY_LIMIT: u8 = 50;
+
+pub const MINIMAL_BOARD_SIZE: usize = 7;

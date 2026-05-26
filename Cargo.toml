@@ -5,3 +5,5 @@ edition = "2024"
 
 [dependencies]
 rand = "0.8.5"
+fltk-table = "0.3.5"
+fltk = { version = "1.5.23", features = ["fltk-bundled"] }
