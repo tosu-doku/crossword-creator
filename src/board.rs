@@ -17,7 +17,7 @@ pub fn return_crossword (words : &mut Vec<&str>) -> Option<(LocationMap,Location
                     (smallest_board.0.0 - smallest_board.1.0)*(smallest_board.0.0 - smallest_board.1.0);
                 let dist_cur = (pos.0.1 - pos.1.1)*(pos.0.1 - pos.1.1) +
                     (pos.0.0 - pos.1.0)*(pos.0.0 - pos.1.0);
-                if dist_best < dist_cur {
+                if dist_best > dist_cur {
                     smallest_board = pos;
                     _best_board = cur_board;
                     bb_char_map = char_map;
